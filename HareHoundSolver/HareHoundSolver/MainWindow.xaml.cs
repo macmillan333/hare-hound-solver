@@ -42,6 +42,10 @@ namespace HareHoundSolver
                 states[id].NextStates = new List<State>();
                 foreach (int next_id in states[id].next_states)
                 {
+                    if (!states[next_id].valid)
+                    {
+                        throw new InvalidOperationException($"State #{id} has an invalid next state #{next_id}.");
+                    }
                     states[id].NextStates.Add(states[next_id]);
                     states[next_id].prev_states.Add(id);
                 }
@@ -49,6 +53,7 @@ namespace HareHoundSolver
 
             // Solve.
             Queue<int> queue = new Queue<int>();
+            HashSet<int> queue_as_set = new HashSet<int>();
             // Initially, put all terminal states into the queue.
             for (int id = 0; id <= State.max_id; id++)
             {
@@ -56,11 +61,14 @@ namespace HareHoundSolver
                     states[id].outcome != State.Outcome.Undecided)
                 {
                     queue.Enqueue(id);
+                    queue_as_set.Add(id);
                 }
             }
+            int first_state_to_retry = -1;
             while (queue.Count > 0)
             {
                 int id = queue.Dequeue();
+                queue_as_set.Remove(id);
                 if (states[id].expected_outcome == State.Outcome.Undecided)
                 {
                     if (states[id].next_states.Count == 0)
@@ -112,19 +120,38 @@ namespace HareHoundSolver
                 }
                 if (states[id].expected_outcome == State.Outcome.Undecided)
                 {
+                    if (id == first_state_to_retry)
+                    {
+                        // We have made zero progress between retries of the same state.
+                        // Declare the game unsolvable.
+                        break;
+                    }
                     // If we cannot solve this state, possibly due to unsolved next states,
                     // try again later.
-                    queue.Enqueue(id);
+                    if (first_state_to_retry == -1)
+                    {
+                        first_state_to_retry = id;
+                    }
+                    if (!queue_as_set.Contains(id))
+                    {
+                        queue.Enqueue(id);
+                        queue_as_set.Add(id);
+                    }
                 }
                 else
                 {
                     // If the state is solved, add all unsolved previous states to the queue
                     // so we can try to solve them later.
+                    first_state_to_retry = -1;
                     foreach (int prev_id in states[id].prev_states)
                     {
                         if (states[prev_id].expected_outcome == State.Outcome.Undecided)
                         {
-                            queue.Enqueue(prev_id);
+                            if (!queue_as_set.Contains(prev_id))
+                            {
+                                queue.Enqueue(prev_id);
+                                queue_as_set.Add(prev_id);
+                            }
                         }
                     }
                 }

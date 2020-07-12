@@ -24,5 +24,28 @@ namespace HareHoundSolver
         {
             InitializeComponent();
         }
+
+        private List<State> states;
+
+        private void solve_button_Click(object sender, RoutedEventArgs e)
+        {
+            // Initialize all states.
+            states = new List<State>();
+            for (int id = 0; id <= State.max_id; id++)
+            {
+                states.Add(new State(id));
+            }
+
+            // Display.
+            game_tree.Items.Clear();
+            // Root state:
+            //    D  1  2
+            // D  4  5  6  R
+            //    D  9 10
+            // board: 3*121+8*11+7 = 458
+            // next player: 0
+            // state ID: 458*2 = 916
+            game_tree.Items.Add(states[916]);
+        }
     }
 }

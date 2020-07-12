@@ -3,10 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:HareHoundSolver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Hare and Hounds" Height="450" Width="800">
+    <Window.Resources>
+        <HierarchicalDataTemplate x:Key="StateTemplate" ItemsSource="{Binding Path=NextStates}">
+            <TextBlock Text="{Binding Path=Display}" FontFamily="Consolas" FontSize="16" Margin="0,10,0,10"></TextBlock>
+        </HierarchicalDataTemplate>
+    </Window.Resources>
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Button Name="solve_button" Content="Solve" Grid.Row="0" Click="solve_button_Click" />
+        <TreeView Name="game_tree" ItemsSource="{Binding}"
+                  ItemTemplate="{StaticResource ResourceKey=StateTemplate}" Grid.Row="1" />
     </Grid>
 </Window>

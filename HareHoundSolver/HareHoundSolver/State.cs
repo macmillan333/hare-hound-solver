@@ -78,15 +78,101 @@ namespace HareHoundSolver
                 }
             }
 
-            // TODO: Is there an outcome?
+            // Is there an outcome?
+            outcome = Outcome.Undecided;
+            // The dogs win if the rabbit's position only has 3 neighbors, and
+            // dogs occupy all of them.
+            int[] rabbit_neighbors = Neighbors(rabbit_position);
+            if (rabbit_neighbors.Length == 3 &&
+                dog_positions[0] == rabbit_neighbors[0] &&
+                dog_positions[1] == rabbit_neighbors[1] &&
+                dog_positions[2] == rabbit_neighbors[2])
+            {
+                outcome = Outcome.DogsWin;
+            }
+            // The rabbit wins if no dog is to the left of it.
+            else
+            {
+                int rabbit_column = Column(rabbit_position);
+                if (Column(dog_positions[0]) >= rabbit_column &&
+                    Column(dog_positions[1]) >= rabbit_column &&
+                    Column(dog_positions[2]) >= rabbit_column)
+                {
+                    outcome = Outcome.RabbitWins;
+                }
+            }
+
+            // If no outcome, find next states.
+            // Previous states will be filled by MainWindow.
+            if (outcome != Outcome.Undecided)
+            {
+                expected_outcome = outcome;
+                return;
+            }
         }
 
+        private int[] Neighbors(int position)
+        {
+            switch (position)
+            {
+                case 0:
+                    return new int[] { 1, 3, 4, 5};
+                case 1:
+                    return new int[] { 0, 2, 5 };
+                case 2:
+                    return new int[] { 1, 5, 6, 7 };
+                case 3:
+                    return new int[] { 0, 4, 8 };
+                case 4:
+                    return new int[] { 0, 3, 5, 8 };
+                case 5:
+                    return new int[] { 0, 1, 2, 4, 6, 8, 9, 10 };
+                case 6:
+                    return new int[] { 2, 5, 7, 10 };
+                case 7:
+                    return new int[] { 2, 6, 10 };
+                case 8:
+                    return new int[] { 3, 4, 5, 9 };
+                case 9:
+                    return new int[] { 5, 8, 10 };
+                case 10:
+                    return new int[] { 5, 6, 7, 9 };
+                default:
+                    return new int[] { };
+            }
+        }
+
+        private int Column(int position)
+        {
+            switch (position)
+            {
+                case 3:
+                    return 0;
+                case 0:
+                case 4:
+                case 8:
+                    return 1;
+                case 1:
+                case 5:
+                case 9:
+                    return 2;
+                case 2:
+                case 6:
+                case 10:
+                    return 3;
+                case 7:
+                    return 4;
+                default:
+                    return -1;
+            }
+        }
+
+        // Draw games only happen after 30 moves, which this class does not track.
         public enum Outcome
         {
             Undecided = -1,
             DogsWin = 0,
-            Draw = 1,
-            RabbitWins = 2
+            RabbitWins = 1
         }
         public Outcome outcome;
         // This is the expected outcome from the current state, assuming
@@ -114,7 +200,7 @@ namespace HareHoundSolver
                     return $"Invalid state #{id}";
                 }
 
-                char[] board_display = { '-', '-', '-', '<', 'X', '+', 'X', '>', '-', '-', '-'};
+                char[] board_display = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'};
                 for (int i = 0; i < 3; i++)
                 {
                     board_display[dog_positions[i]] = 'D';

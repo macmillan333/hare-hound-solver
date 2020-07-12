@@ -46,6 +46,22 @@ namespace HareHoundSolver
             // next player: 0
             // state ID: 458*2 = 916
             game_tree.Items.Add(states[916]);
+            // A winning state for dogs:
+            //    0  1  D
+            // 3  4  5  D  R
+            //    8  9  D
+            // board: 2*1331+6*121+10*11+7 = 3505
+            // next player: 0
+            // state ID: 3505*2 = 7010
+            game_tree.Items.Add(states[7010]);
+            // A winning state for rabbit:
+            //    0  1  D
+            // 3  4  5  R  D
+            //    8  9  D
+            // board: 2*1331+7*121+10*11+6 = 3625
+            // next player: 1
+            // state ID: 3625*2+1 = 7251
+            game_tree.Items.Add(states[7251]);
         }
     }
 }

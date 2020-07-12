@@ -109,9 +109,46 @@ namespace HareHoundSolver
                 expected_outcome = outcome;
                 return;
             }
+            switch (next_player)
+            {
+                case NextPlayer.Dogs:
+                    for (int dog = 0; dog < 3; dog++)
+                    {
+                        int[] dog_neighbors = Neighbors(dog_positions[dog]);
+                        foreach (int next_dog in dog_neighbors)
+                        {
+                            if (Column(next_dog) <
+                                Column(dog_positions[dog]))
+                            {
+                                // Dogs can't go left.
+                                continue;
+                            }
+                            int[] next_dogs = new int[]
+                            {
+                                dog_positions[0],
+                                dog_positions[1],
+                                dog_positions[2]
+                            };
+                            next_dogs[dog] = next_dog;
+                            int next_state = EncodeState(
+                                next_dogs, rabbit_position, NextPlayer.Rabbit);
+                            if (next_state != -1) next_states.Add(next_state);
+                        }
+                    }
+                    break;
+                case NextPlayer.Rabbit:
+                    foreach (int next_rabbit in rabbit_neighbors)
+                    {
+                        int next_state = EncodeState(
+                            dog_positions, next_rabbit, NextPlayer.Dogs);
+                        if (next_state != -1) next_states.Add(next_state);
+                    }
+                    break;
+            }
+            next_states.Sort();
         }
 
-        private int[] Neighbors(int position)
+        private static int[] Neighbors(int position)
         {
             switch (position)
             {
@@ -142,7 +179,7 @@ namespace HareHoundSolver
             }
         }
 
-        private int Column(int position)
+        private static int Column(int position)
         {
             switch (position)
             {
@@ -165,6 +202,20 @@ namespace HareHoundSolver
                 default:
                     return -1;
             }
+        }
+
+        // Dog positions can be out of order; they will be sorted.
+        // Returns -1 on invalid input.
+        private static int EncodeState(int[] dogs, int rabbit, NextPlayer next_player)
+        {
+            Array.Sort(dogs);
+            if (dogs[0] == dogs[1]) return -1;
+            if (dogs[1] == dogs[2]) return -1;
+            if (dogs[0] == rabbit) return -1;
+            if (dogs[1] == rabbit) return -1;
+            if (dogs[2] == rabbit) return -1;
+            int board_state = dogs[0] * 1331 + dogs[1] * 121 + dogs[2] * 11 + rabbit;
+            return board_state * 2 + (int)next_player;
         }
 
         // Draw games only happen after 30 moves, which this class does not track.
